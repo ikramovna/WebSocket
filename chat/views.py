@@ -10,12 +10,10 @@ class MessageList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Check if the user is authenticated
         if not self.request.user.is_authenticated:
-            return Message.objects.none()  # Return an empty queryset for unauthenticated users
-        # Filter messages based on the currently authenticated user
+            return Message.objects.none()
         return Message.objects.filter(receiver=self.request.user)
 
-    def perform_create(self, serializer):
-        # Set the sender as the currently authenticated user
-        serializer.save(sender=self.request.user)
+    def create(self, request, *args, **kwargs):
+        request.data['sender'] = request.user.id
+        return super().create(request, *args, **kwargs)
